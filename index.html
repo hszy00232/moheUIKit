@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<link rel="stylesheet" href="css/uikit.min.css">
+	<link rel="stylesheet" href="css/components/slider.css">
+	<script src="jquery-1.9.1.js"></script>
+	<style>
+	</style>
+</head>
+<body>
+<button class="uk-button uk-button-primary" type="button" data-uk-button>Button</button>
+<ul class="uk-subnav uk-subnav-pill" data-uk-switcher="{connect:'#subnav-pill-content-1'}">
+    <li class="uk-active"><a href="#">Item</a></li>
+    <li ><a href="#">Item</a></li>
+    <li ><a href="#">Item</a></li>
+</ul>
+<ul id="subnav-pill-content-1" class="uk-switcher">
+    <li class="uk-active">Hello!</li>
+    <li >Hello again!</li>
+    <li >Bazinga!</li>
+</ul>
+<ul class="uk-subnav uk-subnav-pill" data-uk-switcher="{connect:'#subnav-pill-content-2'}">
+    <li class="uk-active"><a href="#">Item</a></li>
+    <li ><a href="#">Item</a></li>
+    <li ><a href="#">Item</a></li>
+</ul>
+<ul id="subnav-pill-content-2" class="uk-switcher">
+    <li class="uk-active">Hello!</li>
+    <li >Hello again!</li>
+    <li >Bazinga!</li>
+</ul>
+	<button id="add">添加按钮</button>
+<script src="mhkit.js"></script>
+<script>
+	(function(UI){
+		/**
+		 * 构建组件button
+		 */
+		UI.component("button",{
+			defaults:{},
+			boot:function(){
+				$(document).on("click.button.uikit",'[data-uk-button]',function(e){
+					var ele = $(this);
+					if(!ele.data('button')){
+						var obj = UI.button(ele, UI.Utils.options(ele.attr("data-uk-button")));
+						ele.trigger('click');
+					}
+				});
+			},
+			init:function(){
+				var $this = this;
+				this.on('click',function(e){
+					$this.toggle();
+				})
+			},
+			toggle:function(){
+				console.log("toggle");
+				this.element.toggleClass("uk-active");
+			}
+		});
+	})(MoheKit);
+	(function(UI){
+		UI.component("switcher",{
+			defaults:{
+				connect: false,
+				toggle : ">*",
+				active : 0
+			},
+			boot:function(){
+				console.log("boot");
+				UI.ready(function(context){
+					console.log(context);
+					$("[data-uk-switcher]",context).each(function(){
+						var switcher = $(this);
+						if(!switcher.data('switcher')){
+							var obj = UI.switcher(switcher,UI.Utils.options(switcher.attr("data-uk-switcher")));
+						}
+					})
+				})
+			},
+			init:function(){
+				var $this = this;
+				this.on("click.uikit.switcher",this.options.toggle,function(e){
+					e.preventDefault();
+					$this.show(this);
+				});
+				if(this.options.connect){
+					this.connect = $(this.options.connect);
+				}
+			},
+			show:function(tab){
+				var $this   = this,
+					active  = $(tab), 
+					toggles = this.find(this.options.toggle);
+				toggles.filter('.uk-active').removeClass('uk-active');
+				active.addClass('uk-active');
+				if (this.options.connect && this.connect.length){
+					this.index = this.find(this.options.toggle).index(active);
+					if(this.index == -1){
+						this.index = 0;
+					};
+					this.connect.each(function(){
+						var container = $(this),
+							children  = $(container.children()),
+							current   = $(children.filter('.uk-active')),
+							next      = $(children.eq($this.index));
+
+						current.removeClass("uk-active");
+						next.addClass("uk-active");
+					})
+				}
+				this.trigger("show.uk.switcher", [active]);
+			}
+		})
+	})(MoheKit);
+	$("#add").on('click',function(){
+		$("body").html('<button class="uk-button uk-button-primary" type="button" data-uk-button>Button</button>')
+	})
+</script>
+<script>
+	$('[data-uk-switcher]').on('show.uk.switcher', function(event, area){
+		console.log("Switcher switched to ", area);
+	});
+</script>
+
+</body>
+</html>
